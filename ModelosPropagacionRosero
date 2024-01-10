@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include <math.h>
+
+void calcularModeloExponencial();
+void calcularModeloOkumuraHata();
+
+int main() {
+    int eleccionModelo;
+
+    do {
+        printf("\n---PROPAGACION DE ONDA---\n----------------\n");
+        printf("Selecciona el modelo de propagacion:\n");
+        printf("----------------------------\n");
+        printf("1) Exponencial de Perdida\n");
+        printf("----------------------------\n");
+        printf("2) Okumura Hata\n");
+        printf("----------------------------\n");
+
+        printf("Selecciona el modelo de propagacion a encontrar (1 o 2), o ingresa 0 para salir: ");
+        scanf("%d", &eleccionModelo);
+
+        switch (eleccionModelo) {
+            case 1:
+                calcularModeloExponencial();
+                break;
+            case 2:
+                calcularModeloOkumuraHata();
+                break;
+            case 0:
+                printf("Saliendo del programa.\n");
+                break;
+            default:
+                printf("Opción no válida. Por favor, selecciona nuevamente.\n");
+                break;
+        }
+
+    } while (eleccionModelo != 0);
+
+    return 0;
+}
+
+void calcularModeloExponencial() {
+    printf("MODELO EXPONENCIAL DE PERDIDA EN EL ESPACIO CON FACTOR 'N'\n ");
+    double exponenteN;
+    printf("Ingrese el valor de 'n': ");
+    scanf("%lf", &exponenteN);
+
+    // Ingresamos las variables con las que vamos a trabajar
+    // L = 20 * log(F) + 10 * n * log(D) - 147.56
+    double distanciaAntenas, frecuencia;
+    printf("Ingrese la distancia entre antenas medida en metros: ");
+    scanf("%lf", &distanciaAntenas);
+    printf("Ingrese la frecuencia en Hz: ");
+    scanf("%lf", &frecuencia);
+
+    double factor = 10 * exponenteN;
+    double logDistancia = log10(distanciaAntenas);
+    double logFrecuencia = log10(frecuencia);
+    
+    // Definimos la pérdida en el espacio libre
+    double perdidaEspacio = (20 * logFrecuencia) + (factor * logDistancia) - 147.56;
+
+    printf("La perdida en el espacio con exponente es: L(dB) = %.2lf\n", perdidaEspacio);
+
+    printf("Presiona Enter para volver al menu...");
+    while (getchar() != '\n');  // Limpiar el buffer del teclado
+    getchar();  // Esperar a que el usuario presione Enter
+}
+
+void calcularModeloOkumuraHata() {
+   printf("Este modelo se utiliza en entornos urbanos y suburbanos.\n");
+    double frecuencia, alturaTransmision, alturaRecepcion, distanciaAntenas;
+    printf("Ingrese la frecuencia en MHz: ");
+    scanf("%lf", &frecuencia);
+    printf("Ingrese la altura de la antena de transmision en metros: ");
+    scanf("%lf", &alturaTransmision);
+    printf("Ingrese la altura de la antena de recepcion en metros: ");
+    scanf("%lf", &alturaRecepcion);
+    printf("Ingrese la distancia entre las antenas en Km (1km-20Km): ");
+    scanf("%lf", &distanciaAntenas);
+
+    double perdida = 0;
+    if (frecuencia <= 300) {
+        double Ahr = 8.29 * (pow(log10(1.54 * alturaRecepcion), 2)) - 1.1;
+        perdida = 69.55 + (26.56 * log10(frecuencia)) - (13.8 * log10(alturaTransmision)) - Ahr + (log10(distanciaAntenas) * (44.9 - (6.55 * log10(alturaTransmision))));
+    } else if (frecuencia > 300 && frecuencia < 1500) {
+        double Ahr = 3.2 * (pow(log10(11.75 * alturaRecepcion), 2)) - 4.97;
+        perdida = 69.55 + (26.56 * log10(frecuencia)) - (13.8 * log10(alturaTransmision)) - Ahr + (log10(distanciaAntenas) * (44.9 - (6.55 * log10(alturaTransmision))));
+    } else if (frecuencia >= 1500 && frecuencia <= 2000) {
+        double Ahr = 3.2 * (pow(log10(11.75 * alturaRecepcion), 2)) - 4.97;
+        int tipoEntorno;
+        printf("Elija modelo Suburbano(1) o ciudad grande(2): ");
+        scanf("%d", &tipoEntorno);
+        double correccionModelo = 0;
+        if (tipoEntorno == 2) {
+            correccionModelo = correccionModelo + 3;
+        }
+        perdida = 46.3 + (33.9 * log10(frecuencia)) - (13.82 * log10(alturaTransmision)) - Ahr + (log10(distanciaAntenas) * (44.9 - (6.55 * log10(alturaTransmision)))) + correccionModelo;
+    }
+
+    printf("La pérdida es: L(dB) = %.2lf\n", perdida);
+
+    printf("Presiona Enter para volver al menu...");
+    while (getchar() != '\n');  // Limpiar el buffer del teclado
+    getchar();  // Esperar a que el usuario presione Enter
+}
+
